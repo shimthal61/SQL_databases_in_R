@@ -151,3 +151,80 @@ However, there appears to be only 10 rows. Why did *R* only retrieve 10 rows?
 
 # Laziness
 
+When working with `dplyr` it tried to the minimal work required:
+
+- It never pulls data into *R* unless you specifically ask it. 
+- It delays doing any work until the last possible moment - it collects together everything you want to do and then it sends it to the database in one step. 
+
+When you construct a `dplyr` query, you can connect multiple verbs into a single pipeline. For example, together everything you want to do and then sends it to the database in one step. 
+
+If we wanted to, we could add on even more steps - eg remove the `sex` column as an additional `select` call:
+
+```{r}
+data_subset <- surveys %>%
+  filter(weight < 5) %>%
+  select(species_id, sex, weight)
+
+data_subset %>%
+  select(-sex)
+```
+
+Just like the first `select()` call, the `select(-sex)` command is not executed by *R*. It is sent to the database instead. Only the *final result* is retrieved.
+
+We could always add on more steps, e.g. we could `filter()` by `species_id` or minimum `weight`. That's why *R* doesn't retrieve the full set of results - instead, it only retrieves the first 10 results from the database by default (After all, you might want to add an additional step and get the database to do more work...)
+
+To instruct,, *R* to stop being lazy e.g. to retrieve all of the query results from the database, we add the `collect()` function to our pipe. It indicates that our database query is finished, time to get the *final* results and load them into the *R* session.
+
+```{r}
+data_subset <- surveys %>%
+  filter(weight < 5) %>%
+  select(species_id, sex, weight) %>%
+  collect()
+```
+
+Now we have all 17 rows that match our query in a dataframe, and can continue to work with the exclusviely in *R*, without communicating with the database. 
+
+# Complex database qeuries
+
+`dplyr` enables database queries across one or multiple database tables, using the same single and multiple table verbs we encountered previously. This means we can use the same commands regardless of whether you interact with a remote database or local dataset. This is a really useful feature if you work with large datasets: we can first prototype our code on a small subset that fits into memory, and when your code is ready; you can change the input datasets to your full database without having to change the syntax. 
+
+On the other hand, being able to use `SQL` queries can be useful if your collaborators have already put together complex queries to prepare the data that we need for our analysis.
+
+To illustrate how to use `dplyr` with these complex queries, we are going to join the `plots and `surveys` tables. The `plots` table in the database contains information about the different plots surveyed by the researchers. To access it, we point the `tbl()` command to it.
+
+```{r}
+plots <- tbl(mammals, "plots")
+plots
+```
+
+The `plot_id` column also features in the `surveys` table
+
+Because `plot_id` is listed in both tables, and we can use it to look up matching records, and join the two tables.
+
+If we have two tables named x and y with a common `ID`, we can join them using the `join` functions, two of which are described and illustrated below.
+
+- `inner_join()`: This returns all rows from x where they are matching values in y, and all columns from x and y.
+- `left_join()`: This returns all rows from x, and all columns from x and y. Rows in x with no match in y will have `NA` values in the new_columns.
+
+In both forms of join, if there are multiple matches between x and y, all combinations of the matches are returned. For the full list of `join()` functions, check out the `tidyverse` join page.
+
+For example, to extract all surveys from the first plot, which has `plot_id`, we can do:
+
+```{r}
+plots %>%
+  filter(plot_id == 1) %>%
+  inner_join(surveys) %>%
+  collect()
+```
+
+Without the `collecet()` statment, only the first 10 matching rows are returned. By adding `collect()`, the full set of 1,985 rows are retrieved. 
+
+# Challenge
+
+Let's write a query that returns the number of rodents observed in each plot in each year.
+
+```{r}
+head(surveys, 10)
+surveys %>%
+  filter(species_id == "")
+```

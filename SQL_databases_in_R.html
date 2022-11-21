@@ -1544,7 +1544,6 @@ files.</li>
 ## 
 ##     ident, sql</code></pre>
 <pre class="r"><code>library(RSQLite)</code></pre>
-<pre><code>## Warning: package &#39;RSQLite&#39; was built under R version 4.2.2</code></pre>
 <p>Let’s now download our file <code>portal_mammals.sqlite</code>.</p>
 <pre class="r"><code>dir.create(&quot;raw_data&quot;, showWarnings = FALSE)
 download.file(url = &quot;https://ndownloader.figshare.com/files/2292171&quot;,
@@ -1567,7 +1566,7 @@ instructs <em>R</em> tp connect to the SQLite database contained in the
 <p>Let’s now take a closer look at the <code>mammals</code> database
 we’ve connected toc</p>
 <pre class="r"><code>src_dbi(mammals)</code></pre>
-<pre><code>## src:  sqlite 3.39.4 [C:\Users\Harvey Schneider\Documents\R\R Projects\SQL_databases_in_R\raw_data\portal_mammals.sqlite]
+<pre><code>## src:  sqlite 3.39.4 [C:\Users\harve\Documents\RStudio Projects\SQL_databases_in_R\raw_data\portal_mammals.sqlite]
 ## tbls: plots, species, surveys</code></pre>
 <p>Just like a spreadsheet with multiple worksheets, a SQLite database
 can contain multiple tables. In this case, three of them are listed in
@@ -1588,7 +1587,7 @@ select the columns <code>year</code>, <code>species_id</code>, and
 <code>plot_id</code> from the surveys table.</p>
 <pre class="r"><code>tbl(mammals, sql(&quot;SELECT year, species_id, plot_id FROM surveys&quot;))</code></pre>
 <pre><code>## # Source:   SQL [?? x 3]
-## # Database: sqlite 3.39.4 [C:\Users\Harvey Schneider\Documents\R\R Projects\SQL_databases_in_R\raw_data\portal_mammals.sqlite]
+## # Database: sqlite 3.39.4 [C:\Users\harve\Documents\RStudio Projects\SQL_databases_in_R\raw_data\portal_mammals.sqlite]
 ##     year species_id plot_id
 ##    &lt;int&gt; &lt;chr&gt;        &lt;int&gt;
 ##  1  1977 NL               2
@@ -1614,7 +1613,7 @@ standard <code>dplyr</code> syntax as if it were a data frame.</p>
 surveys %&gt;%
   select(year, species_id, plot_id)</code></pre>
 <pre><code>## # Source:   SQL [?? x 3]
-## # Database: sqlite 3.39.4 [C:\Users\Harvey Schneider\Documents\R\R Projects\SQL_databases_in_R\raw_data\portal_mammals.sqlite]
+## # Database: sqlite 3.39.4 [C:\Users\harve\Documents\RStudio Projects\SQL_databases_in_R\raw_data\portal_mammals.sqlite]
 ##     year species_id plot_id
 ##    &lt;int&gt; &lt;chr&gt;        &lt;int&gt;
 ##  1  1977 NL               2
@@ -1634,7 +1633,7 @@ used on tables from a database. For instance, the <code>head()</code>
 function can be used to check the first 10 rows of the table.</p>
 <pre class="r"><code>head(surveys, 10)</code></pre>
 <pre><code>## # Source:   SQL [10 x 9]
-## # Database: sqlite 3.39.4 [C:\Users\Harvey Schneider\Documents\R\R Projects\SQL_databases_in_R\raw_data\portal_mammals.sqlite]
+## # Database: sqlite 3.39.4 [C:\Users\harve\Documents\RStudio Projects\SQL_databases_in_R\raw_data\portal_mammals.sqlite]
 ##    record_id month   day  year plot_id species_id sex   hindfoot_length weight
 ##        &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;   &lt;int&gt; &lt;chr&gt;      &lt;chr&gt;           &lt;int&gt;  &lt;int&gt;
 ##  1         1     7    16  1977       2 NL         M                  32     NA
@@ -1721,7 +1720,7 @@ allowing us to e.g. <code>select()</code> specific columns,
   filter(weight &lt; 5) %&gt;%
   select(species_id, sex, weight)</code></pre>
 <pre><code>## # Source:   SQL [?? x 3]
-## # Database: sqlite 3.39.4 [C:\Users\Harvey Schneider\Documents\R\R Projects\SQL_databases_in_R\raw_data\portal_mammals.sqlite]
+## # Database: sqlite 3.39.4 [C:\Users\harve\Documents\RStudio Projects\SQL_databases_in_R\raw_data\portal_mammals.sqlite]
 ##    species_id sex   weight
 ##    &lt;chr&gt;      &lt;chr&gt;  &lt;int&gt;
 ##  1 PF         M          4
@@ -1765,7 +1764,7 @@ you want to do and then sends it to the database in one step.</p>
 data_subset %&gt;%
   select(-sex)</code></pre>
 <pre><code>## # Source:   SQL [?? x 2]
-## # Database: sqlite 3.39.4 [C:\Users\Harvey Schneider\Documents\R\R Projects\SQL_databases_in_R\raw_data\portal_mammals.sqlite]
+## # Database: sqlite 3.39.4 [C:\Users\harve\Documents\RStudio Projects\SQL_databases_in_R\raw_data\portal_mammals.sqlite]
 ##    species_id weight
 ##    &lt;chr&gt;       &lt;int&gt;
 ##  1 PF              4
@@ -1822,7 +1821,7 @@ command to it.</p>
 <pre class="r"><code>plots &lt;- tbl(mammals, &quot;plots&quot;)
 plots</code></pre>
 <pre><code>## # Source:   table&lt;plots&gt; [?? x 2]
-## # Database: sqlite 3.39.4 [C:\Users\Harvey Schneider\Documents\R\R Projects\SQL_databases_in_R\raw_data\portal_mammals.sqlite]
+## # Database: sqlite 3.39.4 [C:\Users\harve\Documents\RStudio Projects\SQL_databases_in_R\raw_data\portal_mammals.sqlite]
 ##    plot_id plot_type                
 ##      &lt;int&gt; &lt;chr&gt;                    
 ##  1       1 Spectab exclosure        
@@ -1880,32 +1879,86 @@ page.</p>
 matching rows are returned. By adding <code>collect()</code>, the full
 set of 1,985 rows are retrieved.</p>
 </div>
-<div id="challenge" class="section level1">
-<h1>Challenge</h1>
+<div id="challenges" class="section level1">
+<h1>Challenges</h1>
+<div id="challenge-1" class="section level2">
+<h2>Challenge 1</h2>
 <p>Let’s write a query that returns the number of rodents observed in
 each plot in each year.</p>
-<pre class="r"><code>head(surveys, 10)</code></pre>
-<pre><code>## # Source:   SQL [10 x 9]
-## # Database: sqlite 3.39.4 [C:\Users\Harvey Schneider\Documents\R\R Projects\SQL_databases_in_R\raw_data\portal_mammals.sqlite]
-##    record_id month   day  year plot_id species_id sex   hindfoot_length weight
-##        &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;   &lt;int&gt; &lt;chr&gt;      &lt;chr&gt;           &lt;int&gt;  &lt;int&gt;
-##  1         1     7    16  1977       2 NL         M                  32     NA
-##  2         2     7    16  1977       3 NL         M                  33     NA
-##  3         3     7    16  1977       2 DM         F                  37     NA
-##  4         4     7    16  1977       7 DM         M                  36     NA
-##  5         5     7    16  1977       3 DM         M                  35     NA
-##  6         6     7    16  1977       1 PF         M                  14     NA
-##  7         7     7    16  1977       2 PE         F                  NA     NA
-##  8         8     7    16  1977       1 DM         M                  37     NA
-##  9         9     7    16  1977       1 DM         F                  34     NA
-## 10        10     7    16  1977       6 PF         F                  20     NA</code></pre>
-<pre class="r"><code>surveys %&gt;%
-  filter(species_id == &quot;&quot;)</code></pre>
-<pre><code>## # Source:   SQL [0 x 9]
-## # Database: sqlite 3.39.4 [C:\Users\Harvey Schneider\Documents\R\R Projects\SQL_databases_in_R\raw_data\portal_mammals.sqlite]
-## # … with 9 variables: record_id &lt;int&gt;, month &lt;int&gt;, day &lt;int&gt;, year &lt;int&gt;,
-## #   plot_id &lt;int&gt;, species_id &lt;chr&gt;, sex &lt;chr&gt;, hindfoot_length &lt;int&gt;,
-## #   weight &lt;int&gt;</code></pre>
+<pre class="r"><code>species &lt;- tbl(mammals, &quot;species&quot;)
+
+left_join(surveys, species) %&gt;%
+  filter(taxa == &quot;Rodent&quot;) %&gt;%
+  group_by(taxa, year, plot_id) %&gt;%
+  tally() %&gt;%
+  collect()</code></pre>
+<pre><code>## Joining, by = &quot;species_id&quot;</code></pre>
+<pre><code>## # A tibble: 619 × 4
+## # Groups:   taxa, year [26]
+##    taxa    year plot_id     n
+##    &lt;chr&gt;  &lt;int&gt;   &lt;int&gt; &lt;int&gt;
+##  1 Rodent  1977       1    22
+##  2 Rodent  1977       2    40
+##  3 Rodent  1977       3    17
+##  4 Rodent  1977       4    22
+##  5 Rodent  1977       5    26
+##  6 Rodent  1977       6    18
+##  7 Rodent  1977       7     9
+##  8 Rodent  1977       8    15
+##  9 Rodent  1977       9    27
+## 10 Rodent  1977      10     4
+## # … with 609 more rows</code></pre>
+</div>
+<div id="challenge-2" class="section level2">
+<h2>Challenge 2</h2>
+<p>Let’s now write a query that returns the total number of rodents in
+each genus caught in the different plot types</p>
+<pre class="r"><code>genus_counts &lt;- left_join(surveys, plots) %&gt;%
+  left_join(species) %&gt;%
+  filter(taxa == &quot;Rodent&quot;) %&gt;%
+  group_by(plot_type, genus) %&gt;%
+  tally() %&gt;%
+  collect()</code></pre>
+<pre><code>## Joining, by = &quot;plot_id&quot;
+## Joining, by = &quot;species_id&quot;</code></pre>
+<pre class="r"><code>genus_counts</code></pre>
+<pre><code>## # A tibble: 59 × 3
+## # Groups:   plot_type [5]
+##    plot_type genus                n
+##    &lt;chr&gt;     &lt;chr&gt;            &lt;int&gt;
+##  1 Control   Ammospermophilus   125
+##  2 Control   Baiomys              1
+##  3 Control   Chaetodipus       1902
+##  4 Control   Dipodomys         9847
+##  5 Control   Neotoma            610
+##  6 Control   Onychomys         1481
+##  7 Control   Perognathus        435
+##  8 Control   Peromyscus         464
+##  9 Control   Reithrodontomys    415
+## 10 Control   Rodent               5
+## # … with 49 more rows</code></pre>
+<p>This is useful if we are interested in estimating the number of
+individuals belonging to each genus found in each plot type. But what if
+we were interested in the number of genera foudn in each plot type?
+Usually, <code>tally()</code> gives the number of individuals, instead
+we need to use <code>n_distinct()</code> to count the number of unique
+values found in a column.</p>
+<pre class="r"><code>left_join(surveys, plots) %&gt;%
+left_join(species) %&gt;%
+group_by(plot_type) %&gt;%
+summarise(n_genera = n_distinct(genus)) %&gt;%
+collect()</code></pre>
+<pre><code>## Joining, by = &quot;plot_id&quot;
+## Joining, by = &quot;species_id&quot;</code></pre>
+<pre><code>## # A tibble: 5 × 2
+##   plot_type                 n_genera
+##   &lt;chr&gt;                        &lt;int&gt;
+## 1 Control                         24
+## 2 Long-term Krat Exclosure        22
+## 3 Rodent Exclosure                21
+## 4 Short-term Krat Exclosure       24
+## 5 Spectab exclosure               17</code></pre>
+</div>
 </div>
 
 

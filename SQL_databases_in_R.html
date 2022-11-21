@@ -1544,6 +1544,7 @@ files.</li>
 ## 
 ##     ident, sql</code></pre>
 <pre class="r"><code>library(RSQLite)</code></pre>
+<pre><code>## Warning: package &#39;RSQLite&#39; was built under R version 4.2.2</code></pre>
 <p>Let’s now download our file <code>portal_mammals.sqlite</code>.</p>
 <pre class="r"><code>dir.create(&quot;raw_data&quot;, showWarnings = FALSE)
 download.file(url = &quot;https://ndownloader.figshare.com/files/2292171&quot;,
@@ -1566,7 +1567,7 @@ instructs <em>R</em> tp connect to the SQLite database contained in the
 <p>Let’s now take a closer look at the <code>mammals</code> database
 we’ve connected toc</p>
 <pre class="r"><code>src_dbi(mammals)</code></pre>
-<pre><code>## src:  sqlite 3.39.4 [C:\Users\harve\Documents\RStudio Projects\SQL_databases_in_R\raw_data\portal_mammals.sqlite]
+<pre><code>## src:  sqlite 3.39.4 [C:\Users\Harvey Schneider\Documents\R\R Projects\SQL_databases_in_R\raw_data\portal_mammals.sqlite]
 ## tbls: plots, species, surveys</code></pre>
 <p>Just like a spreadsheet with multiple worksheets, a SQLite database
 can contain multiple tables. In this case, three of them are listed in
@@ -1587,7 +1588,7 @@ select the columns <code>year</code>, <code>species_id</code>, and
 <code>plot_id</code> from the surveys table.</p>
 <pre class="r"><code>tbl(mammals, sql(&quot;SELECT year, species_id, plot_id FROM surveys&quot;))</code></pre>
 <pre><code>## # Source:   SQL [?? x 3]
-## # Database: sqlite 3.39.4 [C:\Users\harve\Documents\RStudio Projects\SQL_databases_in_R\raw_data\portal_mammals.sqlite]
+## # Database: sqlite 3.39.4 [C:\Users\Harvey Schneider\Documents\R\R Projects\SQL_databases_in_R\raw_data\portal_mammals.sqlite]
 ##     year species_id plot_id
 ##    &lt;int&gt; &lt;chr&gt;        &lt;int&gt;
 ##  1  1977 NL               2
@@ -1601,6 +1602,99 @@ select the columns <code>year</code>, <code>species_id</code>, and
 ##  9  1977 DM               1
 ## 10  1977 PF               6
 ## # … with more rows</code></pre>
+</div>
+<div id="querying-the-database-with-the-dplyr-syntax" class="section level2">
+<h2>Querying the database with the <code>dplyr</code> syntax</h2>
+<p>One of the strengths of <code>dplyr</code> is that the same
+operations can be done using <code>dplyr</code>’s verbs instead of
+writing <code>SQL</code>. First, we select the table on which to do the
+operations by creating the surveys object, and then we use the same
+standard <code>dplyr</code> syntax as if it were a data frame.</p>
+<pre class="r"><code>surveys &lt;- tbl(mammals, &quot;surveys&quot;)
+surveys %&gt;%
+  select(year, species_id, plot_id)</code></pre>
+<pre><code>## # Source:   SQL [?? x 3]
+## # Database: sqlite 3.39.4 [C:\Users\Harvey Schneider\Documents\R\R Projects\SQL_databases_in_R\raw_data\portal_mammals.sqlite]
+##     year species_id plot_id
+##    &lt;int&gt; &lt;chr&gt;        &lt;int&gt;
+##  1  1977 NL               2
+##  2  1977 NL               3
+##  3  1977 DM               2
+##  4  1977 DM               7
+##  5  1977 DM               3
+##  6  1977 PF               1
+##  7  1977 PE               2
+##  8  1977 DM               1
+##  9  1977 DM               1
+## 10  1977 PF               6
+## # … with more rows</code></pre>
+<p>In this case, the <code>surveys</code> object behaves like a data
+frame. Several functions that can be used with data frames can also be
+used on tables from a database. For instance, the <code>head()</code>
+function can be used to check the first 10 rows of the table.</p>
+<pre class="r"><code>head(surveys, 10)</code></pre>
+<pre><code>## # Source:   SQL [10 x 9]
+## # Database: sqlite 3.39.4 [C:\Users\Harvey Schneider\Documents\R\R Projects\SQL_databases_in_R\raw_data\portal_mammals.sqlite]
+##    record_id month   day  year plot_id species_id sex   hindfoot_length weight
+##        &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;   &lt;int&gt; &lt;chr&gt;      &lt;chr&gt;           &lt;int&gt;  &lt;int&gt;
+##  1         1     7    16  1977       2 NL         M                  32     NA
+##  2         2     7    16  1977       3 NL         M                  33     NA
+##  3         3     7    16  1977       2 DM         F                  37     NA
+##  4         4     7    16  1977       7 DM         M                  36     NA
+##  5         5     7    16  1977       3 DM         M                  35     NA
+##  6         6     7    16  1977       1 PF         M                  14     NA
+##  7         7     7    16  1977       2 PE         F                  NA     NA
+##  8         8     7    16  1977       1 DM         M                  37     NA
+##  9         9     7    16  1977       1 DM         F                  34     NA
+## 10        10     7    16  1977       6 PF         F                  20     NA</code></pre>
+<p>This output looks just like a regular dataframe. The table has 9
+columns, and the <code>head()</code> function shows us the furst 10
+rows. Note that the columns <code>plot_type</code>, <code>taxa</code>,
+<code>genus</code>, and <code>species</code> are missing. These are now
+located in the tables <code>plots</code> and <code>species</code> which
+we will join together in a moment.</p>
+<p>However, some functions don’t work quite as expected. For instance,
+let’s check how many rows are in total using <code>nrow()</code></p>
+<pre class="r"><code>nrow(surveys)</code></pre>
+<pre><code>## [1] NA</code></pre>
+<p>That’s strange - <em>R</em> doesn’t know how many rows the
+<code>surveys</code> table contains, it returns <code>NA</code> instead.
+If we have a look at the first output from the <code>head()</code>
+function, we notice that the first line includes ’???`, indicating that
+the number of rows wasn’t known.</p>
+<p>The reason for this behaviour highlights a key difference between
+using <code>dplyr</code> on datasets in memory (e.g. loaded into your
+<em>R</em> session via <code>read_csv()</code>), and also provided by a
+database. To understand it, we take a closer look at how
+<code>dplyr</code> communicates with our <code>SQLite</code>
+database.</p>
+</div>
+<div id="sql-translation" class="section level2">
+<h2>SQL Translation</h2>
+<p>Relational databases typically use a special-purpose language,
+`Strcutured Query Language (SQL), to manage and query data.</p>
+<p>For example, the following SQL query returns the first 10 rows from
+the surveys table</p>
+<p><code>SELECT \n FROM &#39;surveys&#39; \n LIMIT 10</code></p>
+<p>Behind the scenes, <code>dplyr</code>:</p>
+<ul>
+<li>Translates the <em>R</em> code in <em>SQL</em>.</li>
+<li>Submits it to the database.</li>
+<li>Tranlates the database’s response into an <em>R</em> data
+frame.</li>
+</ul>
+<p>To see exactly what’s going on, we can use <code>dplyr</code>’s
+<code>show_query()</code> function to show which <code>SQL</code>
+commands are actually sent to the database:</p>
+<pre class="r"><code>show_query(head(surveys, 10))</code></pre>
+<pre><code>## &lt;SQL&gt;
+## SELECT *
+## FROM `surveys`
+## LIMIT 10</code></pre>
+<p>The output shows the actual SQL query sent to the database, it
+matches our manually constructed <code>SELECT</code> statement
+above.</p>
+<p>Instad of having</p>
 </div>
 </div>
 

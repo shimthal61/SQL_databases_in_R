@@ -1,0 +1,75 @@
+---
+title: "SQL databases and R"
+output:
+  html_document:
+    theme: flatly
+    toc: yes
+    toc_float: yes
+    font:family: Lato
+  pdf_document:
+    toc: yes
+---
+
+Learning Objectives:
+
+- Access a database from *R*.
+- Run SQL queries using `RSQLite` and `dplyr`.
+- Describe the lazy behaviour of `dplyr` on data stored in a database outside of *R*.
+- Prototype queries and retrieve all final results.
+- Create complex queries across on of multiple databse tables.
+- Create an SQLite database from existing `.csv` files.
+
+# The `portal_mammals` database
+
+We can explore the `surveys` data. First, we load in the `dbplry` and `RSQLite' package.
+
+```{r}
+library(dplyr)
+library(dbplyr)
+library(RSQLite)
+```
+
+Let's now download our file `portal_mammals.sqlite`. 
+
+```{r}
+dir.create("raw_data", showWarnings = FALSE)
+download.file(url = "https://ndownloader.figshare.com/files/2292171",
+              destfile = "raw_data/portal_mammals.sqlite", mode = "wb")
+```
+
+# Connecting to databases
+
+We can point `R` to this database.
+
+```{r}
+mammals <- DBI::dbConnect(RSQLite::SQLite(), "raw_data/portal_mammals.sqlit")
+```
+
+This command uses two packages enable `dbplry` and `dplyr` communicate with the SQLite database. "DBI" is not something that we'll ever use directly as a user. It allows *R* to send commands to databses irrespetive of the database management system used. The `RSQLite` package allows *R* to interface with SQLite databases.
+
+This command does not load the data into the *R* session (unlike the `read_csv()` function). Instead, it merely instructs *R* tp connect to the SQLite database contained in the `portal_mammals.sqlite` file.
+
+Let's now take a closer look at the `mammals` database we've connected toc
+
+```{r}
+src_dbi(mammals)
+```
+
+Just like a spreadsheet with multiple worksheets, a SQLite database can contain multiple tables. In this case, three of them are listed in the `tbls` ros in the output above:
+
+- plots
+- species
+- surveys
+  
+Now that we know we can connect to the databse, let's explore how to get the data from its tables in *R*.
+
+# Querying the database with the `SQL` syntax
+
+To connect to tables within a database, we can use the `tbl()` function from `dplyr`. This function can be used to send SQL queries to the database. To demonstrate this, let's select the columns `year`, `species_id`, and `plot_id` from the surveys table.
+
+```{r}
+#tbl(mammals, sql("SELECT year, species_id, plot_id FROM surveys"))
+```
+
+
+

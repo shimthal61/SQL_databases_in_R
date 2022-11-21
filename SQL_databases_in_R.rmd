@@ -42,7 +42,7 @@ download.file(url = "https://ndownloader.figshare.com/files/2292171",
 We can point `R` to this database.
 
 ```{r}
-mammals <- DBI::dbConnect(RSQLite::SQLite(), "raw_data/portal_mammals.sqlit")
+mammals <- DBI::dbConnect(RSQLite::SQLite(), "raw_data/portal_mammals.sqlite")
 ```
 
 This command uses two packages enable `dbplry` and `dplyr` communicate with the SQLite database. "DBI" is not something that we'll ever use directly as a user. It allows *R* to send commands to databses irrespetive of the database management system used. The `RSQLite` package allows *R* to interface with SQLite databases.
@@ -63,12 +63,12 @@ Just like a spreadsheet with multiple worksheets, a SQLite database can contain 
   
 Now that we know we can connect to the databse, let's explore how to get the data from its tables in *R*.
 
-# Querying the database with the `SQL` syntax
+## Querying the database with the `SQL` syntax
 
 To connect to tables within a database, we can use the `tbl()` function from `dplyr`. This function can be used to send SQL queries to the database. To demonstrate this, let's select the columns `year`, `species_id`, and `plot_id` from the surveys table.
 
 ```{r}
-#tbl(mammals, sql("SELECT year, species_id, plot_id FROM surveys"))
+tbl(mammals, sql("SELECT year, species_id, plot_id FROM surveys"))
 ```
 
 

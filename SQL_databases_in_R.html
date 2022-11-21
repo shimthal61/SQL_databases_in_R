@@ -1552,7 +1552,7 @@ download.file(url = &quot;https://ndownloader.figshare.com/files/2292171&quot;,
 <div id="connecting-to-databases" class="section level1">
 <h1>Connecting to databases</h1>
 <p>We can point <code>R</code> to this database.</p>
-<pre class="r"><code>mammals &lt;- DBI::dbConnect(RSQLite::SQLite(), &quot;raw_data/portal_mammals.sqlit&quot;)</code></pre>
+<pre class="r"><code>mammals &lt;- DBI::dbConnect(RSQLite::SQLite(), &quot;raw_data/portal_mammals.sqlite&quot;)</code></pre>
 <p>This command uses two packages enable <code>dbplry</code> and
 <code>dplyr</code> communicate with the SQLite database. “DBI” is not
 something that we’ll ever use directly as a user. It allows <em>R</em>
@@ -1566,8 +1566,8 @@ instructs <em>R</em> tp connect to the SQLite database contained in the
 <p>Let’s now take a closer look at the <code>mammals</code> database
 we’ve connected toc</p>
 <pre class="r"><code>src_dbi(mammals)</code></pre>
-<pre><code>## src:  sqlite 3.39.4 [C:\Users\harve\Documents\RStudio Projects\SQL_databases_in_R\raw_data\portal_mammals.sqlit]
-## tbls:</code></pre>
+<pre><code>## src:  sqlite 3.39.4 [C:\Users\harve\Documents\RStudio Projects\SQL_databases_in_R\raw_data\portal_mammals.sqlite]
+## tbls: plots, species, surveys</code></pre>
 <p>Just like a spreadsheet with multiple worksheets, a SQLite database
 can contain multiple tables. In this case, three of them are listed in
 the <code>tbls</code> ros in the output above:</p>
@@ -1578,15 +1578,30 @@ the <code>tbls</code> ros in the output above:</p>
 </ul>
 <p>Now that we know we can connect to the databse, let’s explore how to
 get the data from its tables in <em>R</em>.</p>
-</div>
-<div id="querying-the-database-with-the-sql-syntax" class="section level1">
-<h1>Querying the database with the <code>SQL</code> syntax</h1>
+<div id="querying-the-database-with-the-sql-syntax" class="section level2">
+<h2>Querying the database with the <code>SQL</code> syntax</h2>
 <p>To connect to tables within a database, we can use the
 <code>tbl()</code> function from <code>dplyr</code>. This function can
 be used to send SQL queries to the database. To demonstrate this, let’s
 select the columns <code>year</code>, <code>species_id</code>, and
 <code>plot_id</code> from the surveys table.</p>
-<pre class="r"><code>#tbl(mammals, sql(&quot;SELECT year, species_id, plot_id FROM surveys&quot;))</code></pre>
+<pre class="r"><code>tbl(mammals, sql(&quot;SELECT year, species_id, plot_id FROM surveys&quot;))</code></pre>
+<pre><code>## # Source:   SQL [?? x 3]
+## # Database: sqlite 3.39.4 [C:\Users\harve\Documents\RStudio Projects\SQL_databases_in_R\raw_data\portal_mammals.sqlite]
+##     year species_id plot_id
+##    &lt;int&gt; &lt;chr&gt;        &lt;int&gt;
+##  1  1977 NL               2
+##  2  1977 NL               3
+##  3  1977 DM               2
+##  4  1977 DM               7
+##  5  1977 DM               3
+##  6  1977 PF               1
+##  7  1977 PE               2
+##  8  1977 DM               1
+##  9  1977 DM               1
+## 10  1977 PF               6
+## # … with more rows</code></pre>
+</div>
 </div>
 
 
